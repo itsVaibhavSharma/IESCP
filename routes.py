@@ -8,6 +8,9 @@ import io
 import base64
 from io import BytesIO
 import calendar
+from math import isnan 
+import numpy as np
+
 
 main_bp = Blueprint("main", __name__)
 
@@ -701,69 +704,111 @@ def add_money():
 
     return redirect(url_for('main.sponsor_dashboard'))
 
+
 @main_bp.route('/admin_dashboard')
 def admin_dashboard():
-    if not "admin_id" in session:
+    if "admin_id" not in session:
         return redirect(url_for("main.login_admin"))
+
+    # Fetch data from the database
     campaigns = Campaign.query.all()
     influencers = Influencer.query.all()
     sponsors = Sponsor.query.all()
     adrequests = AdRequest.query.all()
 
-    total_campaigns = len(campaigns)
-    total_influencers = len(influencers)
-    total_sponsors = len(sponsors)
-    total_adrequests = len(adrequests)
-    accepted_adrequests = AdRequest.query.filter_by(status='Accepted').count()
-    rejected_adrequests = AdRequest.query.filter_by(status='Rejected').count()
-    pending_adrequests = AdRequest.query.filter_by(status='Pending').count()
-    public_campaigns = Campaign.query.filter_by(visibility='public').count()
-    private_campaigns = Campaign.query.filter_by(visibility='private').count()
+    # Ensure the counts are valid even if the database is empty
+    total_campaigns = len(campaigns) if campaigns else 0
+    total_influencers = len(influencers) if influencers else 0
+    total_sponsors = len(sponsors) if sponsors else 0
+    total_adrequests = len(adrequests) if adrequests else 0
 
-    total_budget_used = db.session.query(Campaign).join(Campaign.ad_requests)\
-        .filter(AdRequest.status == 'Accepted')\
-        .distinct().with_entities(Campaign.budget).all()
+    # Ensure counts are safe for empty results
+    accepted_adrequests = AdRequest.query.filter_by(status='Accepted').count() if total_adrequests > 0 else 0
+    rejected_adrequests = AdRequest.query.filter_by(status='Rejected').count() if total_adrequests > 0 else 0
+    pending_adrequests = AdRequest.query.filter_by(status='Pending').count() if total_adrequests > 0 else 0
+    public_campaigns = Campaign.query.filter_by(visibility='public').count() if total_campaigns > 0 else 0
+    private_campaigns = Campaign.query.filter_by(visibility='private').count() if total_campaigns > 0 else 0
 
-    total_budget_used = sum(budget for (budget,) in total_budget_used)
+    # Handle total budget safely for empty data
+    total_budget_used = db.session.query(Campaign).join(Campaign.ad_requests) \
+        .filter(AdRequest.status == 'Accepted').distinct().with_entities(Campaign.budget).all()
 
-    fig, ax = plt.subplots()
-    labels = ['Accepted', 'Rejected', 'Pending']
-    sizes = [accepted_adrequests, rejected_adrequests, pending_adrequests]
-    if sum(sizes) == 0:
-        sizes = [1, 1, 1]  
-        labels = ['Accepted (No Data)', 'Rejected (No Data)', 'Pending (No Data)']
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    ax.axis('equal')
-    plt.savefig('static/images/adrequests_status_adm.png')
-    plt.close(fig)
+    total_budget_used = sum(budget for (budget,) in total_budget_used if budget is not None)
+    if np.isnan(total_budget_used) or total_budget_used < 0:
+        total_budget_used = 0
 
-    fig, ax = plt.subplots()
-    labels = ['Public', 'Private']
-    sizes = [public_campaigns, private_campaigns]
-    if sum(sizes) == 0:
-        sizes = [1, 1]  
-        labels = ['Public (No Data)', 'Private (No Data)']
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    ax.axis('equal')
-    plt.savefig('static/images/campaigns_visibility_adm.png')
-    plt.close(fig)
+    # Plot graphs with zero-safe values
 
-    fig, ax = plt.subplots()
-    ax.bar(['Total Budget Used'], [total_budget_used])
-    ax.set_ylabel('Budget')
-    plt.savefig('static/images/budget_usage_adm.png')
-    plt.close(fig)
-
+    # 1. Statistics Bar Graph (Campaigns, Influencers, Sponsors, Ad Requests)
+    statistics_img = io.BytesIO()
     fig, ax = plt.subplots()
     labels = ['Campaigns', 'Influencers', 'Sponsors', 'Ad Requests']
     sizes = [total_campaigns, total_influencers, total_sponsors, total_adrequests]
-    if sum(sizes) == 0:
-        sizes = [1] * len(labels)  
-        labels = [f'{label} (No Data)' for label in labels]
+
+    sizes = np.nan_to_num(sizes)  # Ensure NaN is converted to 0
     ax.bar(labels, sizes)
     ax.set_ylabel('Count')
-    plt.savefig('static/images/statistics_adm.png')
+    plt.savefig(statistics_img, format='png')
     plt.close(fig)
+    statistics_img.seek(0)
+    statistics_img_data = base64.b64encode(statistics_img.getvalue()).decode('utf-8')
+
+    # 2. Ad Requests Status Pie Chart (Accepted, Rejected, Pending)
+    ad_requests_img = io.BytesIO()
+    fig, ax = plt.subplots()
+    labels = ['Accepted', 'Rejected', 'Pending']
+    sizes = [accepted_adrequests, rejected_adrequests, pending_adrequests]
+
+    sizes = np.array(sizes)
+    sizes = np.nan_to_num(sizes)  # Convert NaN to 0
+
+    # Check if all sizes are zero
+    if np.sum(sizes) > 0:
+        autopct = '%1.1f%%'  # Only show percentages if there's data
+    else:
+        autopct = None
+
+    ax.pie(sizes, labels=labels, autopct=autopct, startangle=140)
+    ax.axis('equal')
+    plt.savefig(ad_requests_img, format='png')
+    plt.close(fig)
+    ad_requests_img.seek(0)
+    ad_requests_img_data = base64.b64encode(ad_requests_img.getvalue()).decode('utf-8')
+
+    # 3. Campaigns Visibility Pie Chart (Public, Private)
+    campaigns_visibility_img = io.BytesIO()
+    fig, ax = plt.subplots()
+    labels = ['Public', 'Private']
+    sizes = [public_campaigns, private_campaigns]
+
+    sizes = np.array(sizes)
+    sizes = np.nan_to_num(sizes)  # Convert NaN to 0
+
+    # Check if all sizes are zero
+    if np.sum(sizes) > 0:
+        autopct = '%1.1f%%'  # Only show percentages if there's data
+    else:
+        autopct = None
+
+    ax.pie(sizes, labels=labels, autopct=autopct, startangle=140)
+    ax.axis('equal')
+    plt.savefig(campaigns_visibility_img, format='png')
+    plt.close(fig)
+    campaigns_visibility_img.seek(0)
+    campaigns_visibility_img_data = base64.b64encode(campaigns_visibility_img.getvalue()).decode('utf-8')
+
+    # 4. Budget Usage Bar Chart
+    budget_usage_img = io.BytesIO()
+    fig, ax = plt.subplots()
+
+    total_budget_used = total_budget_used if total_budget_used >= 0 else 0  # Ensure it's non-negative
+
+    ax.bar(['Total Budget Used'], [total_budget_used])
+    ax.set_ylabel('Budget')
+    plt.savefig(budget_usage_img, format='png')
+    plt.close(fig)
+    budget_usage_img.seek(0)
+    budget_usage_img_data = base64.b64encode(budget_usage_img.getvalue()).decode('utf-8')
 
     return render_template('admin_dashboard.html',
                            campaigns=campaigns,
@@ -779,7 +824,13 @@ def admin_dashboard():
                            pending_adrequests=pending_adrequests,
                            public_campaigns=public_campaigns,
                            private_campaigns=private_campaigns,
-                           total_budget_used=total_budget_used)
+                           total_budget_used=total_budget_used,
+                           statistics_img_data=statistics_img_data,
+                           ad_requests_img_data=ad_requests_img_data,
+                           campaigns_visibility_img_data=campaigns_visibility_img_data,
+                           budget_usage_img_data=budget_usage_img_data)
+
+
 
 @main_bp.route('/admin_dashboard/<item_type>_details/<int:item_id>')
 def item_details(item_type, item_id):
