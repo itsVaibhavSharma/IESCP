@@ -22,5 +22,5 @@ class Config:
     SESSION_REDIS = redis.StrictRedis(
         host='redis-15695.c232.us-east-1-2.ec2.redns.redis-cloud.com',
         port=15695,
-        password='<your_redis_password>'
+        password='nJieYHXzXDZIoFMuBDP363ENszfiXdDv'
     )

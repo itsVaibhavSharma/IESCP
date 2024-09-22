@@ -15,10 +15,10 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_REDIS'] = redis.StrictRedis(
     host='redis-15695.c232.us-east-1-2.ec2.redns.redis-cloud.com',
     port=15695,
-    # password='<your_redis_password>'  # Replace with your Redis password if one is set
+    password='nJieYHXzXDZIoFMuBDP363ENszfiXdDv'  # Replace with your Redis password if one is set
 )
 app.config['SESSION_PERMANENT'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Set session lifetime (optional)
+# app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Set session lifetime (optional)
 
 # Initialize Flask-Session
 Session(app)
