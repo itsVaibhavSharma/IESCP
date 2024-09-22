@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Jinja2
+SQLAlchemy
+Flask-Migrate
+Matplotlib
+python-dateutil

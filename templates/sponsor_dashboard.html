@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Sponsor Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="header" id="heading">
+        <h1 id="head">SPONSOR DASHBOARD</h1>
+        <div id="inlline">
+            <button onclick="showSection('profile')" id="profileButton">Profile</button>
+            <button onclick="showSection('campaign')" id="campaignButton">Campaign</button>
+            <button onclick="showSection('find')" id="findButton">Find</button>
+            <button onclick="showSection('stats')" id="statsButton">Statistics</button>
+
+            <button onclick="logout('{{url_for('main.logout')}}')">Logout</button>
+        </div>
+    </div>
+
+    <div id="profile" class="section active">
+        <div class="welcome">
+            <h3>Welcome {{user.name}}</h3>
+            <p>Industry: {{user.industry}}</p>
+            <p>Budget: ₹{{user.budget}}</p>
+            <br><br>
+            <button id="addMoneyBtn">Add Money</button>
+            <a href="#popup" id="edprofbtn">Edit Profile</a>
+        </div>
+
+        <div id="paymentPopupContainer">
+            <div id="paymentPopupContent">
+                <span id="paymentPopupClose">&times;</span>
+                <h2>Add Money to Budget</h2>
+                <form id="paymentPopupForm" action="{{ url_for('main.add_money') }}" method="POST">
+                    <label for="paymentCardNumber">Card Number:</label>
+                    <input type="text" id="paymentCardNumber" name="cardNumber" required pattern="\d{16}"
+                        title="Please enter a valid 16-digit card number.">
+
+                    <label for="paymentExpiryDate">Expiry Date:</label>
+                    <input type="text" id="paymentExpiryDate" name="expiryDate" placeholder="MM/YY" required
+                        pattern="(0[1-9]|1[0-2])\/\d{2}" title="Please enter a valid expiry date in MM/YY format.">
+
+                    <label for="paymentCVV">CVV:</label>
+                    <input type="text" id="paymentCVV" name="cvv" required pattern="\d{3}"
+                        title="Please enter a valid 3-digit CVV.">
+
+                    <label for="paymentAmount">Amount:</label>
+                    <input type="number" id="paymentAmount" name="amount" required min="1"
+                        title="Please enter a valid amount.">
+
+                    <button type="submit">Add Money</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="accamp">
+            <h3>Active Campaigns : </h3>
+            <div>
+                {% for campaign in campaigns %}
+                {% if campaign.sponsor_id == user.id and campaign.progress < 100 and campaign.ad_requests and
+                    adreq_dict[campaign.id].status=="Accepted" %} <div class="accamprow">
+                    <p class="first">{{campaign.name}}</p>
+                    <p class="second">| {{campaign.progress}}% Progress</p>
+                    <button id="viewbtn" onclick="openViewModal('{{ campaign.id }}')">VIEW</button>
+
+                    <div id="viewCampaignModal-{{ campaign.id }}" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeViewCampaignModal('{{ campaign.id }}')">&times;</span>
+                            <div id="campaignDetails-{{ campaign.id }}">
+
+                                <h2>Campaign Details</h2>
+                                {% if campaign.stat != "Active" %}
+                                <form action="{{ url_for('main.update_campaign', campaign_id=campaign.id) }}"
+                                    method="post">
+                                    <p><strong>Name:</strong> <input type="text" name="name"
+                                            value="{{ campaign.name }}"></p>
+                                    <p><strong>Description:</strong> <textarea
+                                            name="description">{{ campaign.description }}</textarea></p>
+                                    <p><strong>Start Date:</strong> <input type="date" name="start_date"
+                                            value="{{ campaign.start_date.strftime('%Y-%m-%d') }}"></p>
+                                    <p><strong>End Date:</strong> <input type="date" name="end_date"
+                                            value="{{ campaign.end_date.strftime('%Y-%m-%d') }}"></p>
+                                    <p><strong>Budget:</strong> <input type="number" name="budget"
+                                            value="{{ campaign.budget }}"></p>
+                                    <p><strong>Visibility:</strong>
+                                        <select name="visibility">
+                                            <option value="public" {% if campaign.visibility=='public' %}selected{%
+                                                endif %}>Public</option>
+                                            <option value="private" {% if campaign.visibility=='private' %}selected{%
+                                                endif %}>Private</option>
+                                        </select>
+                                    </p>
+                                    <p><strong>Goals:</strong> <textarea name="goals">{{ campaign.goals }}</textarea>
+                                    </p>
+                                    <button type="submit">Update Campaign</button>
+                                </form>
+
+                                <h3>Ad Requests</h3>
+                                {% for ad_request in adrequests if ad_request.campaign_id ==campaign.id %}
+                                <div class="ad-request">
+                                    <p><strong>Influencer:</strong> {{ ad_request.influencer.name }}</p>
+                                    <p><strong>Status:</strong> {{ ad_request.status }}</p>
+                                    <p><strong>Message:</strong> {{ ad_request.message }}</p>
+                                    <p><strong>Requirements:</strong> {{ ad_request.requirements }}</p>
+                                    <p><strong>Payment Amount:</strong> {{ ad_request.payment_amount }}</p>
+                                    {% if ad_request.negotiation %}
+                                    <p><strong>Negotiation Amount:</strong> {{ ad_request.negotiation_amt }}</p>
+                                    {% endif %}
+                                    <div class="actions">
+                                        {% if ad_request.for_who == "influencer" %}
+                                        {% if ad_request.status == 'Pending' %}
+                                        <form
+                                            action="{{ url_for('main.accept_ad_request', ad_request_id=ad_request.id) }}"
+                                            method="post" style="display:inline;">
+                                            <button type="submit">Accept</button>
+                                        </form>
+                                        <form
+                                            action="{{ url_for('main.reject_ad_request', ad_request_id=ad_request.id) }}"
+                                            method="post" style="display:inline;">
+                                            <button type="submit">Reject</button>
+                                        </form>
+                                        {% if ad_request.negotiation %}
+                                        <form
+                                            action="{{ url_for('main.negotiate_ad_request', ad_request_id=ad_request.id) }}"
+                                            method="post" style="display:inline;">
+                                            <input type="text" name="negotiation_amount"
+                                                placeholder="Negotiation Amount">
+                                            <button type="submit">Negotiate Again</button>
+                                        </form>
+                                        {% endif %}
+
+                                        {% elif ad_request.status == 'Accepted' %}
+                                        <p>This ad request has been accepted.</p>
+                                        {% elif ad_request.status == 'Rejected' %}
+                                        <p>This ad request has been rejected.</p>
+                                        <form action="{{ url_for('main.new_ad_request', adreqid = ad_request.id) }}"
+                                            method="post" style="display:inline;">
+                                            <select name="new_influencer_id">
+
+                                                {% for influencer in influencers %}
+                                                <option value="{{ influencer.id }}">{{ influencer.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit">Create New Ad Request</button>
+                                        </form>
+                                        {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p><strong>Name:</strong> {{ campaign.name }}</p>
+                                <p><strong>Description:</strong> {{ campaign.description }}</p>
+                                <p><strong>Start Date:</strong> {{ campaign.start_date.strftime('%Y-%m-%d %H:%M:%S') }}
+                                </p>
+                                <p><strong>End Date:</strong> {{ campaign.end_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                <p><strong>Budget:</strong> {{ campaign.budget }}</p>
+                                <p><strong>Visibility:</strong> {{ campaign.visibility }}</p>
+                                <p><strong>Goals:</strong> {{ campaign.goals }}</p>
+                                <p><strong>Progress:</strong> {{ campaign.progress }}%</p>
+                                <p><strong>Status:</strong> Active</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <p>No campaigns found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="accamp">
+        <h3>New Requests :</h3>
+        <div>
+            {% for adrequest in adrequests if adrequest.status == "Pending" and adrequest.campaign.progress < 100 and
+                adrequest.for_who=="sponsor" %} <div class="accamprow">
+                <p class="first">{{ adrequest.campaign.name }}</p>
+                <p id="sec" class="second">| {{ adrequest.influencer.name }}</p>
+                <button id="btn1" onclick="openAdRequestModal('{{ adrequest.id }}')"
+                    href="#viewcampaign{{ adrequest.id }}">VIEW</button>
+                {% if adrequest.status == "Pending" %}
+                <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                    style="display:inline;">
+                    <button type="submit" id="btn2" href="#viewcampaign{{ adrequest.id }}">ACCEPT</button>
+                </form>
+                <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                    style="display:inline;">
+                    <button type="submit" id="btn3">REJECT</button>
+                </form>
+                {% endif %}
+
+                <div id="viewAdRequestModal-{{ adrequest.id }}" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeAdRequestModal('{{ adrequest.id }}')">&times;</span>
+                        <h2>Ad Request Details</h2>
+                        <p><strong>Status:</strong>
+                            {% if adrequest.status == 'Pending' %}
+                            <span style="color: orange;">{{ adrequest.status }}</span>
+                            {% elif adrequest.status == 'Accepted' %}
+                            <span style="color: green;">{{ adrequest.status }}</span>
+                            {% else %}
+                            <span style="color: red;">{{ adrequest.status }}</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Campaign name:</strong> {{ adrequest.campaign.name }}</p>
+                        <p><strong>Influencer name:</strong> {{ adrequest.influencer.name }}</p>
+                        <p><strong>Message:</strong> {{ adrequest.message }}</p>
+                        <p><strong>Requirements:</strong> {{ adrequest.requirements }}</p>
+                        <p><strong>Payment Amount:</strong> {{ adrequest.payment_amount }}</p>
+                        {% if adrequest.negotiation %}
+                        <p><strong>Negotiation Amount:</strong> {{ adrequest.negotiation_amt }}</p>
+                        {% endif %}
+                        {% if adrequest.status == 'Pending' %}
+                        <div class="actions">
+                            <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}"
+                                method="post" style="display:inline;">
+                                <button type="submit">Accept</button>
+                            </form>
+                            <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}"
+                                method="post" style="display:inline;">
+                                <button style="background-color: red;" type="submit">Reject</button>
+                            </form>
+                            {% if adrequest.negotiation %}
+                            <form action="{{ url_for('main.negotiate_ad_request', ad_request_id=adrequest.id) }}"
+                                method="post" style="display:inline;">
+                                <input type="text" name="negotiation_amount" placeholder="Negotiation Amount">
+                                <button type="submit">Negotiate Again</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+        </div>
+        {% else %}
+        <p>No Ad Request found.</p>
+        {% endfor %}
+    </div>
+    </div>
+
+    <div id="popup" class="edpopin">
+        <h2>Edit Profile</h2>
+        <form method="post" action="{{ url_for('main.edit_prof') }}">
+            <p>Email id: {{user.email}}</p>
+            <label for="name">Name</label>
+            <input id="name" name="name" value="{{ user.name }}" type="text">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password">
+            <div class="agin">
+                <label id="agelb" for="age">Age</label>
+                <input id="age" name="age" value="{{ user.age }}" type="number">
+            </div>
+            <div class="agin">
+                <label id="indlb" for="industry">Industry</label>
+                <input id="industry" name="industry" value="{{ user.industry }}" type="text">
+            </div>
+
+            <label id="name" for="budget">Budget</label>
+            <input id="name" name="budget" value="{{ user.budget }}" type="number">
+
+            <button type="submit">Save Profile</button>
+        </form>
+    </div>
+    <a href="#" class="edpopout"></a>
+
+    </div>
+
+    <div id="campaign" class="section">
+
+        <div class="accamp">
+            <h3>All Campaigns :</h3>
+            <div class="addcampdiv">
+                <button id="addCampaignButton" onclick="openModal()">ADD CAMPAIGN</button>
+            </div>
+            <div>
+                {% for campaign in campaigns if campaign.sponsor_id == user.id %}
+
+                <div class="accamprow">
+                    <p class="first">{{ campaign.name }}</p>
+                    <p class="second">| {{ campaign.progress }}% Progress</p>
+                    {% if campaign.progress == 100 and campaign.ad_requests and adreq_dict[campaign.id].status ==
+                    "Accepted" %}
+                    <span style="color: green; margin-right: 10px;">Completed</span>
+                    {% elif campaign.progress < 100 and campaign.ad_requests and
+                        adreq_dict[campaign.id].status=="Pending" %} <span style="color: orange; margin-right: 10px;">
+                        Pending</span>
+
+                        {% elif (campaign.progress == 100 and not campaign.ad_requests) or (campaign.progress == 100 and
+                        campaign.ad_requests and adreq_dict[campaign.id].status != "Accepted") or (campaign.progress <
+                            100 and campaign.ad_requests and adreq_dict[campaign.id].status=="Rejected" ) %} <span
+                            style="color: red;margin-right: 10px;">Inactive</span>
+                            {% elif campaign.progress < 100 and campaign.ad_requests and
+                                adreq_dict[campaign.id].status=="Accepted" %} <span
+                                style="color: rgb(0, 205, 0); margin-right: 10px;">Active</span>
+                                {% endif %}
+                                <button id="viewbtn" onclick="openViewModalCC('{{ campaign.id }}')">VIEW</button>
+
+                                <div id="viewCampaignModalCC-{{ campaign.id }}" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close"
+                                            onclick="closeViewCampaignModalCC('{{ campaign.id }}')">&times;</span>
+                                        <div id="campaignDetails-{{ campaign.id }}">
+
+                                            <h2>Campaign Details</h2>
+
+                                            {% if adreq_dict[campaign.id] == None or (adreq_dict[campaign.id].status !=
+                                            "Accepted" and campaign.progress < 100 and
+                                                adreq_dict[campaign.id].for_who=="influencer" ) %} <form
+                                                action="{{ url_for('main.update_campaign', campaign_id=campaign.id) }}"
+                                                method="post">
+                                                <p><strong>Name:</strong> <input type="text" name="name"
+                                                        value="{{ campaign.name }}"></p>
+                                                <p><strong>Description:</strong> <textarea
+                                                        name="description">{{ campaign.description }}</textarea></p>
+                                                <p><strong>Start Date:</strong> <input type="date" name="start_date"
+                                                        value="{{ campaign.start_date.strftime('%Y-%m-%d') }}"></p>
+                                                <p><strong>End Date:</strong> <input type="date" name="end_date"
+                                                        value="{{ campaign.end_date.strftime('%Y-%m-%d') }}"></p>
+                                                <p><strong>Budget:</strong> <input type="number" name="budget"
+                                                        value="{{ campaign.budget }}"></p>
+
+                                                <label for="new-visibility"><strong>Visibility:</strong></label>
+                                                <select id="new-visibility" name="visibility">
+                                                    <option value="public" {% if campaign.visibility=='public'
+                                                        %}selected{% endif %}>Public</option>
+                                                    <option value="private" {% if campaign.visibility=='private'
+                                                        %}selected{% endif %}>Private</option>
+                                                </select>
+
+                                                <p><strong>Goals:</strong> <textarea
+                                                        name="goals">{{ campaign.goals }}</textarea></p>
+                                                <button type="submit">Update Campaign</button>
+                                                </form>
+                                                <form
+                                                    action="{{ url_for('main.delete_campaign', campaign_id = campaign.id) }}"
+                                                    method="post" style="display:inline;">
+                                                    <button id="delbtn" type="submit">DELETE</button>
+                                                </form>
+                                                {% else %}
+                                                <p><strong>Name:</strong> {{ campaign.name }}</p>
+                                                <p><strong>Description:</strong> {{ campaign.description }}</p>
+                                                <p><strong>Start Date:</strong> {{
+                                                    campaign.start_date.strftime('%Y-%m-%d %H:%M:%S') }}
+                                                </p>
+                                                <p><strong>End Date:</strong> {{ campaign.end_date.strftime('%Y-%m-%d
+                                                    %H:%M:%S') }}</p>
+                                                <p><strong>Budget:</strong> {{ campaign.budget }}</p>
+                                                <p><strong>Visibility:</strong> {{ campaign.visibility }}</p>
+                                                <p><strong>Goals:</strong> {{ campaign.goals }}</p>
+                                                <p><strong>Progress:</strong> {{ campaign.progress }}%</p>
+                                                <p><strong>Status:</strong> {{campaign.stat}}</p>
+                                                {% endif %}
+
+                                                <h3>Ad Requests</h3>
+                                                {% for ad_request in adrequests if ad_request.campaign_id == campaign.id
+                                                %}
+                                                <div class="ad-request">
+                                                    <p><strong>Influencer:</strong> {{ ad_request.influencer.name }}</p>
+                                                    {% if ad_request.for_who == "influencer" %}(Sent){% elif
+                                                    ad_request.for_who == "sponsor" %}(Received){% endif %}
+                                                    <p><strong>Status:</strong> {{ ad_request.status }}</p>
+                                                    {% if ad_request.for_who == "influencer" %}
+                                                    <p><strong>Message:</strong> {{ ad_request.message }}</p>
+                                                    <p><strong>Requirements:</strong> {{ ad_request.requirements }}</p>
+                                                    {% endif %}
+                                                    <p><strong>Payment Amount:</strong> {{ ad_request.payment_amount }}
+                                                    </p>
+                                                    {% if ad_request.negotiation %}
+                                                    <p><strong>Negotiation Amount:</strong> {{
+                                                        ad_request.negotiation_amt }}</p>
+                                                    {% endif %}
+                                                    <div class="actions">
+                                                        {% if ad_request.status == 'Pending' and ad_request.for_who ==
+                                                        "sponsor" %}
+                                                        <form
+                                                            action="{{ url_for('main.accept_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <button type="submit">Accept</button>
+                                                        </form>
+                                                        <form
+                                                            action="{{ url_for('main.reject_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <button type="submit">Reject</button>
+                                                        </form>
+                                                        {% if ad_request.negotiation %}
+                                                        <form
+                                                            action="{{ url_for('main.negotiate_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <input type="text" name="negotiation_amount"
+                                                                placeholder="Negotiation Amount">
+                                                            <button type="submit">Negotiate Again</button>
+                                                        </form>
+                                                        {% endif %}
+                                                        {% endif %}
+                                                        {% if ad_request.status == 'Rejected' and
+                                                        ad_request.campaign.progress < 100 %} <p>This ad request has
+                                                            been rejected.</p>
+                                                            <form
+                                                                action="{{ url_for('main.new_ad_request', adreqid=ad_request.id) }}"
+                                                                method="post" style="display:inline;">
+                                                                <select name="new_influencer_id">
+                                                                    {% for influencer in influencers %}
+                                                                    <option value="{{ influencer.id }}">{{
+                                                                        influencer.name
+                                                                        }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <button type="submit">Create New Ad Request</button>
+                                                            </form>
+                                                            {% else %}
+                                                            {% if ad_request.status == 'Accepted' %}
+                                                            <p>This ad request has been accepted.</p>
+                                                            {% elif ad_request.status == 'Rejected' %}
+                                                            <p>This ad request has been rejected.</p>
+                                                            {% endif %}
+                                                            {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                </div>
+                {% else %}
+                <p>No campaigns found.</p>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <div class="accamp">
+            <h3>All Requests :</h3>
+            <div>
+
+                <div class="addcampdiv">
+                    <button id="addCampaignButton" onclick="openSendAdRequestModal()">CREATE AD REQUEST</button>
+                </div>
+
+                <div id="sendAdRequestModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeSendAdRequestModal()">&times;</span>
+                        <h2>Send Ad Request</h2>
+                        <form action="{{ url_for('main.send_ad_request') }}" method="POST">
+                            <label for="campaignSearch">Search Campaign:</label>
+                            <input type="text" id="campaignSearch" class="search-input"
+                                placeholder="Search for campaigns..." onkeyup="filterCampaigns()">
+                            <label for="campaignSelect">Select Campaign:</label>
+                            <select id="campaignSelect" name="campaign_id" class="styled-select" required>
+                                {% for campaign in campaigns if ((campaign.visibility == "private" and
+                                adreq_dict[campaign.id].status == "Rejected") or (campaign.visibility == "public")) and
+                                campaign.progress < 100 %} <option value="{{ campaign.id }}">{{ campaign.name }}
+                                    </option>
+                                    {% endfor %}
+                            </select>
+
+                            <label for="influencerSearch">Search Influencer:</label>
+                            <input type="text" id="influencerSearch" class="search-input"
+                                placeholder="Search for influencers..." onkeyup="filterInfluencers()">
+                            <label for="influencerSelect">Select Influencer:</label>
+                            <select id="influencerSelect" name="influencer_id" class="styled-select" required>
+                                {% for influencer in influencers %}
+                                <option value="{{ influencer.id }}">{{ influencer.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label for="message">Message:</label>
+                            <textarea id="message" name="message" required></textarea>
+
+                            <label for="requirements">Requirements:</label>
+                            <textarea id="requirements" name="requirements" required></textarea>
+
+                            <label for="paymentAmount">Payment Amount:</label>
+                            <input type="number" id="paymentAmount" name="payment_amount" required>
+
+                            <button type="submit">Send Ad Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% for adrequest in adrequests if adrequest.campaign.sponsor_id == user.id %}
+
+                <div class="accamprow">
+                    <p class="first">{{ adrequest.campaign.name }}<br>{% if adrequest.for_who == "influencer" %}(Sent){%
+                        elif adrequest.for_who == "sponsor" %}(Received){% endif %}</p>
+                    <p id="sec" class="second">| {{ adrequest.influencer.name }}</p>
+                    <button id="btn1" onclick="openAdRequestModalC('{{ adrequest.id }}')">VIEW</button>
+
+                    {% if adrequest.status == "Pending" and adrequest.for_who == "sponsor" %}
+                    <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                        style="display:inline;">
+                        <button type="submit" id="btn2">ACCEPT</button>
+                    </form>
+                    <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                        style="display:inline;">
+                        <button type="submit" id="btn3">REJECT</button>
+                    </form>
+                    {% else %}
+
+                    {% if adrequest.status == 'Accepted' %}
+                    <span style="color: green; margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% elif adrequest.status == 'Pending' %}
+                    <span style="color: orange; margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% else %}
+                    <span style="color: red;margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% endif %}
+                    {% endif %}
+
+                    <div id="viewAdRequestModalC-{{ adrequest.id }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeAdRequestModalC('{{ adrequest.id }}')">&times;</span>
+                            <h2>Ad Request Details</h2>
+                            <p><strong>Status:</strong>
+                                {% if adrequest.status == 'Pending' %}
+                                <span style="color: orange;">{{ adrequest.status }}</span>
+                                {% elif adrequest.status == 'Accepted' %}
+                                <span style="color: green;">{{ adrequest.status }}</span>
+                                {% else %}
+                                <span style="color: red;">{{ adrequest.status }}</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Campaign name:</strong> {{ adrequest.campaign.name }}</p>
+                            <p><strong>Influencer name:</strong> {{ adrequest.influencer.name }}</p>
+                            <p><strong>Message:</strong> {{ adrequest.message }}</p>
+                            <p><strong>Requirements:</strong> {{ adrequest.requirements }}</p>
+                            <p><strong>Payment Amount:</strong> {{ adrequest.payment_amount }}</p>
+                            {% if adrequest.negotiation %}
+                            <p><strong>Negotiation Amount:</strong> {{ adrequest.negotiation_amt }}</p>
+                            {% endif %}
+                            {% if adrequest.status == 'Pending' and adrequest.for_who == "sponsor" %}
+                            <div class="actions">
+                                <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <button type="submit">Accept</button>
+                                </form>
+                                <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <button style="background-color: red;" type="submit">Reject</button>
+                                </form>
+                                {% if adrequest.negotiation %}
+                                <form action="{{ url_for('main.negotiate_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <input type="text" name="negotiation_amount" placeholder="Negotiation Amount">
+                                    <button type="submit">Negotiate Again</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% if adrequest.for_who == "influencer" and adrequest.status == "Pending" %}
+                            <form action="{{ url_for('main.delete_ad_request', ad_request_id=adrequest.id) }}"
+                                method="post" style="display:inline;">
+                                <button id="delbtn" type="submit">DELETE</button>
+                            </form>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                </div>
+                {% else %}
+                <p>No Ad Request found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="addCampaignModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Add Campaign</h2>
+                <form id="addCampaignForm" action="{{ url_for('main.sponsor_dashboard') }}" method="POST">
+                    <label for="name">Campaign Name:</label>
+                    <input type="text" id="name" name="name" required>
+
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" required></textarea>
+
+                    <label for="budget">Budget:</label>
+                    <input type="number" id="budget" name="budget" required>
+
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" required>
+
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" required>
+
+                    <label for="visibility">Visibility:</label>
+                    <select id="visibility" name="visibility" onchange="toggleInfluencerSelection()">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+
+                    <div id="influencerSelection" style="display: none;">
+                        <button type="button" onclick="openInfluencerModal()">Select Influencer</button>
+                        <input type="hidden" id="selectedInfluencer" name="selectedInfluencer">
+                        <span id="selectedInfluencerName"></span>
+                    </div>
+
+                    <label id="reqs" for="reqs2" style="display: none;">Requirements:</label>
+                    <textarea id="reqs2" name="requirements" style="display: none;"></textarea>
+
+                    <label id="mess" for="mess2" style="display: none;">Message:</label>
+                    <textarea id="mess2" name="message" style="display: none;"></textarea>
+
+                    <label for="goals">Goals:</label>
+                    <textarea id="goals" name="goals" required></textarea>
+
+                    <button type="submit">Create Campaign</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="influencerModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeInfluencerModal()">&times;</span>
+                <h2>Select Influencer</h2>
+                <div>
+                    <label for="categoryFilter">Filter by Category:</label>
+                    <select id="categoryFilter" onchange="filterInfluencersList()">
+                        <option value="">All</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="influencersList">
+                    {% for influencer in influencers %}
+                    <div class="influencer-card" data-category="{{ influencer.category }}">
+                        <p><strong>Name:</strong> {{ influencer.name }}</p>
+                        <p><strong>Niche:</strong> {{ influencer.niche }}</p>
+                        <p><strong>Reach:</strong> {{ influencer.reach }}</p>
+                        <button type="button" onclick="viewProfile({{ influencer.id }})">View Profile</button>
+                        <button type="button"
+                            onclick="selectInfluencer({{ influencer.id }}, '{{ influencer.name }}')">Select</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="viewProfileModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeViewProfileModal()">&times;</span>
+                <h2>Influencer Profile</h2>
+                <div id="profileContent">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="find" class="section">
+        <h2>Search and Filter</h2>
+        <form method="POST" action="{{ url_for('main.sponsor_dashboard') }}">
+
+            <div class="form-group">
+                <label for="campaign_name">Campaign Name:</label>
+                <input type="text" id="campaign_name" name="campaign_name" class="form-control"
+                    placeholder="Search by campaign name">
+            </div>
+
+            <div class="form-group">
+                <label for="influencer_name">Influencer Name:</label>
+                <input type="text" id="influencer_name" name="ad_influencer_name" class="form-control"
+                    placeholder="Search by influencer name">
+            </div>
+
+            <div class="form-group">
+                <label for="min_budget">Minimum Budget:</label>
+                <input type="number" id="min_budget" name="min_budget" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="max_budget">Maximum Budget:</label>
+                <input type="number" id="max_budget" name="max_budget" class="form-control" placeholder="10000">
+            </div>
+
+            <div class="form-group">
+                <label for="visibility">Visibility:</label>
+                <select id="visibility" name="visibility" class="form-control">
+                    <option value="">Select Visibility</option>
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ad_influencer_name">Ad Influencer Name:</label>
+                <input type="text" id="ad_influencer_name" name="ad_influencer_name" class="form-control"
+                    placeholder="Search by influencer name">
+            </div>
+            <div class="form-group">
+                <label for="payment_amount">Payment Amount:</label>
+                <input type="number" id="payment_amount" name="payment_amount" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="ad_status">Ad Request Status:</label>
+                <select id="ad_status" name="ad_status" class="form-control">
+                    <option value="">Select Status</option>
+                    <option value="Accepted">Accepted</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ad_sent">Ad Request Sent/Received:</label>
+                <select id="ad_sent" name="ad_sent" class="form-control">
+                    <option value="">Select</option>
+                    <option value="sent">Sent</option>
+                    <option value="received">Received</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <div id="filtered_campaigns">
+            <h3>Filtered Campaigns</h3>
+            <ul>
+                {% if filtered_campaigns %}
+                {% for campaign in filtered_campaigns %}
+                <div class="accamprow">
+                    <p class="first">{{ campaign.name }}</p>
+                    <p class="second">{{campaign.visibility.capitalize()}} | {{ campaign.progress }}% Progress</p>
+                    {% if campaign.progress == 100 and campaign.ad_requests and adreq_dict[campaign.id].status ==
+                    "Accepted" %}
+                    <span style="color: green; margin-right: 10px;">Completed</span>
+                    {% elif campaign.progress < 100 and campaign.ad_requests and
+                        adreq_dict[campaign.id].status=="Pending" %} <span style="color: orange; margin-right: 10px;">
+                        Pending</span>
+
+                        {% elif (campaign.progress == 100 and not campaign.ad_requests) or (campaign.progress == 100 and
+                        campaign.ad_requests and adreq_dict[campaign.id].status != "Accepted") or (campaign.progress <
+                            100 and campaign.ad_requests and adreq_dict[campaign.id].status=="Rejected" ) %} <span
+                            style="color: red;margin-right: 10px;">Inactive</span>
+                            {% elif campaign.progress < 100 and campaign.ad_requests and
+                                adreq_dict[campaign.id].status=="Accepted" %} <span
+                                style="color: rgb(0, 205, 0); margin-right: 10px;">Active</span>
+                                {% endif %}
+                                <button id="viewbtn" onclick="openViewModalCFS('{{ campaign.id }}')">VIEW</button>
+
+                                <div id="viewCampaignModalCFS-{{ campaign.id }}" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close"
+                                            onclick="closeViewCampaignModalCFS('{{ campaign.id }}')">&times;</span>
+                                        <div id="campaignDetails-{{ campaign.id }}">
+
+                                            <h2>Campaign Details</h2>
+                                            {% if adreq_dict[campaign.id].status != "Accepted" and campaign.progress <
+                                                100 %} <form
+                                                action="{{ url_for('main.update_campaign', campaign_id=campaign.id) }}"
+                                                method="post">
+                                                <p><strong>Name:</strong> <input type="text" name="name"
+                                                        value="{{ campaign.name }}"></p>
+                                                <p><strong>Description:</strong> <textarea
+                                                        name="description">{{ campaign.description }}</textarea></p>
+                                                <p><strong>Start Date:</strong> <input type="date" name="start_date"
+                                                        value="{{ campaign.start_date.strftime('%Y-%m-%d') }}"></p>
+                                                <p><strong>End Date:</strong> <input type="date" name="end_date"
+                                                        value="{{ campaign.end_date.strftime('%Y-%m-%d') }}"></p>
+                                                <p><strong>Budget:</strong> <input type="number" name="budget"
+                                                        value="{{ campaign.budget }}"></p>
+
+                                                <label for="new-visibility"><strong>Visibility:</strong></label>
+                                                <select id="new-visibility" name="visibility">
+                                                    <option value="public" {% if campaign.visibility=='public'
+                                                        %}selected{% endif %}>Public</option>
+                                                    <option value="private" {% if campaign.visibility=='private'
+                                                        %}selected{% endif %}>Private</option>
+                                                </select>
+
+                                                <p><strong>Goals:</strong> <textarea
+                                                        name="goals">{{ campaign.goals }}</textarea></p>
+                                                <button type="submit">Update Campaign</button>
+                                                </form>
+
+                                                {% else %}
+                                                <p><strong>Name:</strong> {{ campaign.name }}</p>
+                                                <p><strong>Description:</strong> {{ campaign.description }}</p>
+                                                <p><strong>Start Date:</strong> {{
+                                                    campaign.start_date.strftime('%Y-%m-%d %H:%M:%S') }}
+                                                </p>
+                                                <p><strong>End Date:</strong> {{ campaign.end_date.strftime('%Y-%m-%d
+                                                    %H:%M:%S') }}</p>
+                                                <p><strong>Budget:</strong> {{ campaign.budget }}</p>
+                                                <p><strong>Visibility:</strong> {{ campaign.visibility }}</p>
+                                                <p><strong>Goals:</strong> {{ campaign.goals }}</p>
+                                                <p><strong>Progress:</strong> {{ campaign.progress }}%</p>
+                                                <p><strong>Status:</strong> {{campaign.stat}}</p>
+                                                {% endif %}
+                                                <h3>Ad Requests</h3>
+                                                {% for ad_request in adrequests if ad_request.campaign_id == campaign.id
+                                                %}
+                                                <div class="ad-request">
+                                                    <p><strong>Influencer:</strong> {{ ad_request.influencer.name }}</p>
+                                                    {% if ad_request.for_who == "influencer" %}(Sent){% elif
+                                                    ad_request.for_who == "sponsor" %}(Received){% endif %}
+                                                    <p><strong>Status:</strong> {{ ad_request.status }}</p>
+                                                    {% if ad_request.for_who == "influencer" %}
+                                                    <p><strong>Message:</strong> {{ ad_request.message }}</p>
+                                                    <p><strong>Requirements:</strong> {{ ad_request.requirements }}</p>
+                                                    {% endif %}
+                                                    <p><strong>Payment Amount:</strong> {{ ad_request.payment_amount }}
+                                                    </p>
+                                                    {% if ad_request.negotiation %}
+                                                    <p><strong>Negotiation Amount:</strong> {{
+                                                        ad_request.negotiation_amt }}</p>
+                                                    {% endif %}
+                                                    <div class="actions">
+                                                        {% if ad_request.status == 'Pending' and ad_request.for_who ==
+                                                        "sponsor" %}
+                                                        <form
+                                                            action="{{ url_for('main.accept_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <button type="submit">Accept</button>
+                                                        </form>
+                                                        <form
+                                                            action="{{ url_for('main.reject_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <button type="submit">Reject</button>
+                                                        </form>
+                                                        {% if ad_request.negotiation %}
+                                                        <form
+                                                            action="{{ url_for('main.negotiate_ad_request', ad_request_id=ad_request.id) }}"
+                                                            method="post" style="display:inline;">
+                                                            <input type="text" name="negotiation_amount"
+                                                                placeholder="Negotiation Amount">
+                                                            <button type="submit">Negotiate Again</button>
+                                                        </form>
+                                                        {% endif %}
+                                                        {% endif %}
+                                                        {% if ad_request.status == 'Rejected' and
+                                                        ad_request.campaign.progress < 100 %} <p>This ad request has
+                                                            been rejected.</p>
+                                                            <form
+                                                                action="{{ url_for('main.new_ad_request', adreqid=ad_request.id) }}"
+                                                                method="post" style="display:inline;">
+                                                                <select name="new_influencer_id">
+                                                                    {% for influencer in influencers %}
+                                                                    <option value="{{ influencer.id }}">{{
+                                                                        influencer.name
+                                                                        }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <button type="submit">Create New Ad Request</button>
+                                                            </form>
+                                                            {% else %}
+                                                            {% if ad_request.status == 'Accepted' %}
+                                                            <p>This ad request has been accepted.</p>
+                                                            {% elif ad_request.status == 'Rejected' %}
+                                                            <p>This ad request has been rejected.</p>
+                                                            {% endif %}
+                                                            {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                </div>
+
+                {% endfor %}
+                {% else %}
+                <li>No campaigns found.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div id="filtered_ad_requests">
+            <h3>Filtered Ad Requests</h3>
+            <ul>
+                {% if filtered_adrequests %}
+                {% for adrequest in filtered_adrequests %}
+                <div class="accamprow">
+                    <p class="first">{{ adrequest.campaign.name }}<br>{% if adrequest.for_who == "influencer" %}(Sent){%
+                        elif adrequest.for_who == "sponsor" %}(Received){% endif %}</p>
+                    <p id="sec" class="second">| {{ adrequest.influencer.name }}</p>
+                    <button id="btn1" onclick="openAdRequestModalCFS('{{ adrequest.id }}')">VIEW</button>
+
+                    {% if adrequest.status == "Pending" and adrequest.for_who == "sponsor" %}
+                    <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                        style="display:inline;">
+                        <button type="submit" id="btn2">ACCEPT</button>
+                    </form>
+                    <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}" method="post"
+                        style="display:inline;">
+                        <button type="submit" id="btn3">REJECT</button>
+                    </form>
+                    {% else %}
+
+                    {% if adrequest.status == 'Accepted' %}
+                    <span style="color: green; margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% elif adrequest.status == 'Pending' %}
+                    <span style="color: orange; margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% else %}
+                    <span style="color: red;margin-right: 10px; margin-left: -70px;">{{ adrequest.status }}</span>
+                    {% endif %}
+                    {% endif %}
+
+                    <div id="viewAdRequestModalCFS-{{ adrequest.id }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeAdRequestModalCFS('{{ adrequest.id }}')">&times;</span>
+                            <h2>Ad Request Details</h2>
+                            <p><strong>Status:</strong>
+                                {% if adrequest.status == 'Pending' %}
+                                <span style="color: orange;">{{ adrequest.status }}</span>
+                                {% elif adrequest.status == 'Accepted' %}
+                                <span style="color: green;">{{ adrequest.status }}</span>
+                                {% else %}
+                                <span style="color: red;">{{ adrequest.status }}</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Campaign name:</strong> {{ adrequest.campaign.name }}</p>
+                            <p><strong>Influencer name:</strong> {{ adrequest.influencer.name }}</p>
+                            <p><strong>Message:</strong> {{ adrequest.message }}</p>
+                            <p><strong>Requirements:</strong> {{ adrequest.requirements }}</p>
+                            <p><strong>Payment Amount:</strong> {{ adrequest.payment_amount }}</p>
+                            {% if adrequest.negotiation %}
+                            <p><strong>Negotiation Amount:</strong> {{ adrequest.negotiation_amt }}</p>
+                            {% endif %}
+                            {% if adrequest.status == 'Pending' and adrequest.for_who == "sponsor" %}
+                            <div class="actions">
+                                <form action="{{ url_for('main.accept_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <button type="submit">Accept</button>
+                                </form>
+                                <form action="{{ url_for('main.reject_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <button style="background-color: red;" type="submit">Reject</button>
+                                </form>
+                                {% if adrequest.negotiation %}
+                                <form action="{{ url_for('main.negotiate_ad_request', ad_request_id=adrequest.id) }}"
+                                    method="post" style="display:inline;">
+                                    <input type="text" name="negotiation_amount" placeholder="Negotiation Amount">
+                                    <button type="submit">Negotiate Again</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+                {% else %}
+                <li>No ad requests found.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="stats" class="section">
+        <div class="stats-container">
+            <div class="stat-box">
+                <h3>Total Campaigns</h3>
+                <p>{{ total_campaigns }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Public Campaigns</h3>
+                <p>{{ public_campaigns }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Private Campaigns</h3>
+                <p>{{ private_campaigns }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Ad Requests</h3>
+                <p>{{ total_ad_requests }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Accepted Requests</h3>
+                <p>{{ accepted_requests }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Rejected Requests</h3>
+                <p>{{ rejected_requests }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Pending Requests</h3>
+                <p>{{ pending_requests }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Money Spent</h3>
+                <p>{{ money_spent }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Sent Requests</h3>
+                <p>{{ sent_requests }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Received Requests</h3>
+                <p>{{ received_requests }}</p>
+            </div>
+        </div>
+        <div class="charts-container">
+            <div class="chart">
+                <h3>Campaign Visibility</h3>
+                <img src="data:image/png;base64,{{ campaign_visibility_chart }}" alt="Campaign Visibility Chart">
+            </div>
+            <div class="chart">
+                <h3>Ad Request Status</h3>
+                <img src="data:image/png;base64,{{ ad_request_status_chart }}" alt="Ad Request Status Chart">
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

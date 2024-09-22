@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
+
+<body>
+    <div class="header" id="heading">
+        <h1 id="head">ADMIN DASHBOARD</h1>
+        <div id="inlline">
+            <button onclick="showSection('profile')" id="profileButton">Statistics</button>
+            <button onclick="showSection('sponsor')" id="sponsorButton">Sponsors</button>
+            <button onclick="showSection('influencer')" id="influencerButton">Influencers</button>
+            <button onclick="showSection('campaign')" id="campaignButton">Campaigns</button>
+            <button onclick="showSection('adreq')" id="adreqButton">AdRequests</button>
+            <button onclick="logout('{{url_for('main.logout')}}')">Logout</button>
+        </div>
+    </div>
+
+    <div id="profile" class="section active">
+        <div class="stats-container_adm">
+            <div class="stat-box_adm">
+                <h3>Total Campaigns</h3>
+                <p>{{ total_campaigns }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Total Influencers</h3>
+                <p>{{ total_influencers }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Total Sponsors</h3>
+                <p>{{ total_sponsors }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Total Ad Requests</h3>
+                <p>{{ total_adrequests }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Accepted Ad Requests</h3>
+                <p>{{ accepted_adrequests }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Rejected Ad Requests</h3>
+                <p>{{ rejected_adrequests }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Pending Ad Requests</h3>
+                <p>{{ pending_adrequests }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Public Campaigns</h3>
+                <p>{{ public_campaigns }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Private Campaigns</h3>
+                <p>{{ private_campaigns }}</p>
+            </div>
+            <div class="stat-box_adm">
+                <h3>Total Budget Used</h3>
+                <p>{{ total_budget_used }}</p>
+            </div>
+        </div>
+        <div class="graphs_adm">
+            <div class="graph-item">
+                <h3>Statistics Graph</h3>
+                <img src="{{ url_for('static', filename='images/statistics_adm.png') }}" alt="Statistics Graph">
+            </div>
+            <div class="graph-item">
+                <h3>Ad Requests Status Graph</h3>
+                <img src="{{ url_for('static', filename='images/adrequests_status_adm.png') }}" alt="Ad Requests Status Graph">
+            </div>
+            <div class="graph-item">
+                <h3>Campaigns Visibility Graph</h3>
+                <img src="{{ url_for('static', filename='images/campaigns_visibility_adm.png') }}" alt="Campaigns Visibility Graph">
+            </div>
+            <div class="graph-item">
+                <h3>Budget Usage Graph</h3>
+                <img src="{{ url_for('static', filename='images/budget_usage_adm.png') }}" alt="Budget Usage Graph">
+            </div>
+        </div>
+        
+
+        
+    </div>
+
+    <div id="sponsor" class="section">
+        <div class="box-container">
+            {% for sponsor in sponsors %}
+                <div class="box-adm">
+                    <h3>{{ sponsor.name }}</h3>
+                    <p>Status: {{ 'Flagged' if sponsor.flagged else 'Not Flagged' }}</p>
+                    <p>Budget: ₹{{ sponsor.budget }}</p>
+                    <button class="btn-adm" data-id="{{ sponsor.id }}" data-type="sponsor" onclick="openDetailsModal(this)">View Details</button>
+                    <form action="{{ url_for('main.toggle_flag_sponsor', item_id=sponsor.id) }}" method="post" style="display:inline;">
+                        <button class="btn-adm flag-btn" type="submit">
+                            {{ 'Unflag' if sponsor.flagged else 'Flag' }}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div id="influencer" class="section">
+        <div class="box-container">
+            {% for influencer in influencers %}
+                <div class="box-adm">
+                    <h3>{{ influencer.name }}</h3>
+                    <p>Status: {{ 'Flagged' if influencer.flagged else 'Not Flagged' }}</p>
+                    <p>Category: {{ influencer.category }}</p>
+                    <button class="btn-adm" data-id="{{ influencer.id }}" data-type="influencer" onclick="openDetailsModal(this)">View Details</button>
+                    <form action="{{ url_for('main.toggle_flag_influencer', item_id=influencer.id) }}" method="post" style="display:inline;">
+                        <button class="btn-adm flag-btn" type="submit">
+                            {{ 'Unflag' if influencer.flagged else 'Flag' }}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div id="campaign" class="section">
+        <div class="box-container">
+            {% for campaign in campaigns %}
+                <div class="box-adm">
+                    <h3>{{ campaign.name }}</h3>
+                    <p>Status: {{ 'Flagged' if campaign.flagged else 'Not Flagged' }}</p>
+                    <p>Start Date: {{ campaign.start_date.strftime('%Y-%m-%d') }}</p>
+                    <p>End Date: {{ campaign.end_date.strftime('%Y-%m-%d') }}</p>
+                    <button class="btn-adm" data-id="{{ campaign.id }}" data-type="campaign" onclick="openDetailsModal(this)">View Details</button>
+                    <form action="{{ url_for('main.toggle_flag_campaign', item_id=campaign.id) }}" method="post" style="display:inline;">
+                        <button class="btn-adm flag-btn" type="submit">
+                            {{ 'Unflag' if campaign.flagged else 'Flag' }}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div id="adreq" class="section">
+        <div class="box-container">
+            {% for adrequest in adrequests %}
+                <div class="box-adm">
+                    <h3>Campaign name: {{ adrequest.campaign.name }}</h3>
+                    <p>Influencer name: {{ adrequest.influencer.name }}</p>
+                    <p>Status: {{ adrequest.status }}</p>
+                    <p>Payment Amount: ₹{{ adrequest.payment_amount }}</p>
+                    <button class="btn-adm" data-id="{{ adrequest.id }}" data-type="adrequest" onclick="openDetailsModal(this)">View Details</button>
+                    <form action="{{ url_for('main.toggle_flag_adrequest', item_id=adrequest.id) }}" method="post" style="display:inline;">
+                        <button class="btn-adm flag-btn" type="submit">
+                            {{ 'Unflag' if adrequest.flagged else 'Flag' }}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+            
+            <div id="details-modal-adm" class="modal-adm">
+                <div class="modal-content-adm">
+                    <span class="close-adm" onclick="closeDetailsModal()">&times;</span>
+                    <div id="modal-body-adm">
+                        
+                    </div>
+                </div>
+            </div>
+        
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
