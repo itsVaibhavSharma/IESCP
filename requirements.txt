@@ -7,3 +7,5 @@ Matplotlib
 python-dateutil
 werkzeug
 psycopg2-binary #for vercel deployment
+Flask-Session
+redis
