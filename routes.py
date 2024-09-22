@@ -825,10 +825,10 @@ def admin_dashboard():
                            public_campaigns=public_campaigns,
                            private_campaigns=private_campaigns,
                            total_budget_used=total_budget_used,
-                           statistics_img_data=statistics_img_data,
-                           ad_requests_img_data=ad_requests_img_data,
-                           campaigns_visibility_img_data=campaigns_visibility_img_data,
-                           budget_usage_img_data=budget_usage_img_data)
+                           statistics_img=statistics_img_data,
+                           ad_requests_img=ad_requests_img_data,
+                           campaigns_visibility_img=campaigns_visibility_img_data,
+                           budget_usage_img=budget_usage_img_data)
 
 
 

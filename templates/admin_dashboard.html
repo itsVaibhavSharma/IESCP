@@ -72,7 +72,7 @@
             <div class="graph-item">
                 <h3>Statistics Graph</h3>
                 {% if statistics_img %}
-                <img src="data:image/png;base64,{{ statistics_img|b64encode }}" alt="Statistics Graph">
+                <img src="data:image/png;base64,{{ statistics_img }}" alt="Statistics Graph">
                 {% else %}
                 No data Available
                 {% endif %}
@@ -80,7 +80,7 @@
             <div class="graph-item">
                 <h3>Ad Requests Status Graph</h3>
                 {% if ad_requests_img %}
-                <img src="data:image/png;base64,{{ ad_requests_img|b64encode }}" alt="Ad Requests Status Graph">
+                <img src="data:image/png;base64,{{ ad_requests_img }}" alt="Ad Requests Status Graph">
                 {% else %}
                 No data Available
                 {% endif %}
@@ -88,8 +88,7 @@
             <div class="graph-item">
                 <h3>Campaigns Visibility Graph</h3>
                 {% if campaigns_visibility_img %}
-                <img src="data:image/png;base64,{{ campaigns_visibility_img|b64encode }}"
-                    alt="Campaigns Visibility Graph">
+                <img src="data:image/png;base64,{{ campaigns_visibility_img }}" alt="Campaigns Visibility Graph">
                 {% else %}
                 No data Available
                 {% endif %}
@@ -97,14 +96,12 @@
             <div class="graph-item">
                 <h3>Budget Usage Graph</h3>
                 {% if budget_usage_img %}
-                <img src="data:image/png;base64,{{ budget_usage_img|b64encode }}" alt="Budget Usage Graph">
+                <img src="data:image/png;base64,{{ budget_usage_img }}" alt="Budget Usage Graph">
                 {% else %}
                 No data Available
                 {% endif %}
             </div>
         </div>
-
-
 
 
     </div>
