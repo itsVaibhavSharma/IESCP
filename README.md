@@ -26,8 +26,6 @@ A web application built using **Python**, **Flask**, and **SQLite** that connect
 
 ## Screenshots
 
-_Add screenshots of your platform here to visually showcase your project._
-
 #### Home
 
 ![HOME](screenshots/home.png)
@@ -122,8 +120,7 @@ _Add screenshots of your platform here to visually showcase your project._
 
 ## Demo
 
-You can check the live demo of the platform here: **[Live Demo Link](#)**  
-_(Link will be updated after deployment)_
+You can check the live demo of the platform here: **[Live Demo Link](#)**
 
 ## Installation
 
@@ -186,10 +183,6 @@ To run this project locally, follow these steps:
 ### ER Diagram
 
 ![ER](screenshots/dbschema.png)
-
-## Deployment
-
-The application will be deployed to **[Platform Name]** soon. Stay tuned for the link!
 
 ## Future Enhancements
 
