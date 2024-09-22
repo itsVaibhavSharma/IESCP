@@ -58,7 +58,7 @@ def signup_influencer():
             new_inf = Influencer(name = name, email=email,password=password,niche=niche,category=category,reach=reach)
             db.session.add(new_inf)
             db.session.commit()
-            return redirect(url_for("main.login_user"))
+            return redirect( url_for("main.login_user"))
 
     return render_template("signup_influencer.html", error = error)
 

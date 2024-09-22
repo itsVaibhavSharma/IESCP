@@ -124,7 +124,7 @@
 
     <div class="content">
         <h2>USER LOGIN</h2>
-        <p>Are you an admin? <a href="{{url_for(" main.login_admin")}}">Login as Admin</a></p>
+        <p>Are you an admin? <a href="{{url_for('main.login_admin')}}">Login as Admin</a></p>
         {% if error %}
         <div class="alert alert-warning mt-2" role="alert">
             {{ error }}
@@ -143,8 +143,8 @@
 
             <button type="submit">LOGIN</button>
 
-            <p>Or continue with<br><a href="{{url_for(" main.signup_influencer")}}">Sign up as Influencer</a> or <a
-                    href="{{url_for(" main.signup_sponsor")}}">Sign up as Sponsor</a> </p>
+            <p>Or continue with<br><a href="{{url_for('main.signup_influencer')}}">Sign up as Influencer</a> or <a
+                    href="{{url_for('main.signup_sponsor')}}">Sign up as Sponsor</a> </p>
         </form>
     </div>
 

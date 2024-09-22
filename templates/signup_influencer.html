@@ -102,8 +102,8 @@
 
     <div class="content">
         <h2>INFLUENCER REGISTRATION</h2>
-        <p>Already Signed up? <a href="{{url_for(" main.login_user")}}">Login as User</a> or <a href="{{url_for("
-                main.login_admin")}}">Login as Admin</a></p>
+        <p>Already Signed up? <a href="{{url_for('main.login_user')}}">Login as User</a> or <a
+                href="{{url_for('main.login_admin')}}">Login as Admin</a></p>
         {% if error %}
         <div class="alert alert-warning mt-2" role="alert">
             {{ error }}
@@ -126,7 +126,7 @@
             <button type="submit">SIGN UP</button>
             <p>
             <p id="star">*</p> fields are required</p>
-            <p>Or continue with <a href="{{url_for(" main.signup_sponsor")}}">Sign up as Sponsor</a></p>
+            <p>Or continue with <a href="{{url_for('main.signup_sponsor')}}">Sign up as Sponsor</a></p>
         </form>
     </div>
 
