@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
     <style>
         #heading {
             background-color: rgba(72, 76, 126, 0.914);
@@ -20,7 +20,7 @@
         }
 
         body {
-            
+
             background: linear-gradient(180deg, rgb(140, 197, 255), rgb(21, 0, 114));
             ;
 
@@ -84,7 +84,7 @@
             display: inline;
         }
 
-       
+
 
         a:hover {
             color: rgb(21, 0, 114);
@@ -93,8 +93,6 @@
         button:hover {
             background-color: darkcyan;
         }
-
-       
     </style>
 </head>
 
@@ -105,14 +103,14 @@
 
     <div class="content">
         <h2>ADMIN LOGIN</h2>
-        <p>Are you a user? <a href="{{url_for("main.login_user")}}">Login as User</a></p>
+        <p>Are you a user? <a href="{{url_for(" main.login_user")}}">Login as User</a></p>
         {% if error %}
-                <div class="alert alert-warning mt-2" role="alert">
-                    {{ error }}
-                </div>
-            {% endif %}
+        <div class="alert alert-warning mt-2" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
         <form method="post">
-            
+
             <label for="email">Email <p id="star">*</p></label>
             <input name="email" placeholder="Type..." type="email" id="email" required>
             <label for="password">Password <p id="star">*</p></label>
@@ -120,7 +118,8 @@
 
             <button type="submit">LOGIN</button>
 
-            <p>Or continue with<br><a href="{{url_for("main.signup_influencer")}}">Sign up as Influencer</a> or <a href="{{url_for("main.signup_sponsor")}}">Sign up as Sponsor</a>  </p>
+            <p>Or continue with<br><a href="{{url_for(" main.signup_influencer")}}">Sign up as Influencer</a> or <a
+                    href="{{url_for(" main.signup_sponsor")}}">Sign up as Sponsor</a> </p>
         </form>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>

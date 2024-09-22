@@ -1,118 +1,138 @@
 <html>
-    <head>
-        <title>{{ title }}</title>
-        <meta charset = "utf-8">
-        <meta name="viewport" content="initial-scale=1, width=device-width">
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 
-        <style>
-            #heading {
-                background-color: rgba(72, 76, 126, 0.914);
-                color: white;
-                padding: 1% 0;
-                margin: -10px;
-            }
-            #head {
-                text-align: center;
-                margin : auto auto;
-            }
-            body {
-                /* background-color: rgba(122, 122, 253, 0.5); */
-                background:  linear-gradient(180deg, rgb(140, 197, 255), rgb(21, 0, 114));;
-                
-            }
-            .content {
-                width: 35%;
-                max-height: fit-content;
-                background-color: white;
-                margin: 7% auto;
-                padding: 1%;
-                align-content: center;
-            }
-            h2{
-                font-style: bold;
-                font-family: sans-serif;
-                text-align: center;
-            }
-            p {
-                text-align: center;
-            }
-            form {
-                margin: 0 auto;
-                width: 70%;
-            }
-            label,input, button {
-                display: block;
-                
-                
-            }
-            input {
-                margin-top: 5px;
-                width: 100%;
-                height: 30px;
-            }
-            label {
-                margin-top: 15px;
-                font-size: 20px;
-            }
-            button {
-                margin-top: 20px;
-                margin-left: auto;
-                margin-right: auto;
-                height: 40px;
-                width:100px;
-                background-color: rgb(0, 179, 24);
-                color:rgb(255, 255, 255);
-                font-size: medium;
-            }
-            #star {
-                color: red;
-                display: inline;
-            }
-            a:hover {
-                color:rgb(21, 0, 114);
-            }
-            button:hover{
-                background-color: darkcyan;
-            }
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <style>
+        #heading {
+            background-color: rgba(72, 76, 126, 0.914);
+            color: white;
+            padding: 1% 0;
+            margin: -10px;
+        }
 
-        </style>
-    </head>
-    <body>
-        <div id ="heading">
-            <h1 id = "head">INFLUENCER-SPONSOR PLATFORM</h1>
+        #head {
+            text-align: center;
+            margin: auto auto;
+        }
+
+        body {
+            /* background-color: rgba(122, 122, 253, 0.5); */
+            background: linear-gradient(180deg, rgb(140, 197, 255), rgb(21, 0, 114));
+            ;
+
+        }
+
+        .content {
+            width: 35%;
+            max-height: fit-content;
+            background-color: white;
+            margin: 7% auto;
+            padding: 1%;
+            align-content: center;
+        }
+
+        h2 {
+            font-style: bold;
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        form {
+            margin: 0 auto;
+            width: 70%;
+        }
+
+        label,
+        input,
+        button {
+            display: block;
+
+
+        }
+
+        input {
+            margin-top: 5px;
+            width: 100%;
+            height: 30px;
+        }
+
+        label {
+            margin-top: 15px;
+            font-size: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40px;
+            width: 100px;
+            background-color: rgb(0, 179, 24);
+            color: rgb(255, 255, 255);
+            font-size: medium;
+        }
+
+        #star {
+            color: red;
+            display: inline;
+        }
+
+        a:hover {
+            color: rgb(21, 0, 114);
+        }
+
+        button:hover {
+            background-color: darkcyan;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="heading">
+        <h1 id="head">INFLUENCER-SPONSOR PLATFORM</h1>
+    </div>
+
+    <div class="content">
+        <h2>SPONSOR REGISTRATION</h2>
+        <p>Already Signed up? <a href="{{url_for(" main.login_user")}}">Login as User</a> or <a href="{{url_for("
+                main.login_admin")}}">Login as Admin</a></p>
+        {% if error %}
+        <div class="alert alert-warning mt-2" role="alert">
+            {{ error }}
         </div>
+        {% endif %}
+        <form method="post">
+            <label for="name">Name <p id="star">*</p></label>
+            <input name="name" placeholder="Type..." type="text" id="name" required>
+            <label for="email">Email <p id="star">*</p></label>
+            <input name="email" placeholder="Type..." type="email" id="email" required>
+            <label for="password">Password <p id="star">*</p></label>
+            <input name="password" placeholder="Type..." type="password" required>
+            <label for="industry">Industry <p id="star">*</p></label>
+            <input name="industry" placeholder="Type..." type="text" required>
 
-        <div class="content">
-            <h2>SPONSOR REGISTRATION</h2>
-            <p>Already Signed up? <a href="{{url_for("main.login_user")}}">Login as User</a> or <a href="{{url_for("main.login_admin")}}">Login as Admin</a></p>
-            {% if error %}
-                <div class="alert alert-warning mt-2" role="alert">
-                    {{ error }}
-                </div>
-            {% endif %}
-            <form method="post">
-                <label for="name">Name <p id="star">*</p></label>
-                <input name = "name" placeholder="Type..." type="text" id="name" required>
-                <label for="email">Email <p id="star">*</p></label>
-                <input name = "email" placeholder="Type..." type="email" id="email" required>
-                <label for="password">Password <p id="star">*</p></label>
-                <input name = "password" placeholder="Type..." type="password" required>
-                <label for="industry">Industry <p id="star">*</p></label>
-                <input name = "industry" placeholder="Type..." type="text" required>
-               
-                <label for="budget">Budget <p id="star">*</p></label>
-                <input name = "budget" placeholder="Type..." type="number" required>
+            <label for="budget">Budget <p id="star">*</p></label>
+            <input name="budget" placeholder="Type..." type="number" required>
 
-                <button type="submit">SIGN UP</button>
-                <p><p id="star">*</p> fields are required</p>
-                <p>Or continue with <a href="{{url_for("main.signup_influencer")}}">Sign up as Influencer</a></p>
-            </form>
-        </div>
-      
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    
-    </body>
+            <button type="submit">SIGN UP</button>
+            <p>
+            <p id="star">*</p> fields are required</p>
+            <p>Or continue with <a href="{{url_for(" main.signup_influencer")}}">Sign up as Influencer</a></p>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+
 </html>

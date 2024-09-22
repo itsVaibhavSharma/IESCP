@@ -4,7 +4,7 @@
     <title>USER LOGIN</title>
     <meta charset="utf-8">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
     <meta name="viewport" content="initial-scale=1, width=device-width">
     <style>
         #heading {
@@ -20,7 +20,7 @@
         }
 
         body {
-            
+
             background: linear-gradient(180deg, rgb(140, 197, 255), rgb(21, 0, 114));
             ;
 
@@ -91,12 +91,13 @@
             margin: 0 0.5em 0 0;
             vertical-align: middle;
         }
-        #spon{
+
+        #spon {
             margin-left: 20%;
         }
 
         .rad {
-           display: inline;
+            display: inline;
         }
 
         a:hover {
@@ -108,7 +109,7 @@
         }
 
         #radiv {
-            
+
             margin: auto auto;
             text-align: center;
 
@@ -123,16 +124,17 @@
 
     <div class="content">
         <h2>USER LOGIN</h2>
-        <p>Are you an admin? <a href="{{url_for("main.login_admin")}}">Login as Admin</a></p>
+        <p>Are you an admin? <a href="{{url_for(" main.login_admin")}}">Login as Admin</a></p>
         {% if error %}
-                <div class="alert alert-warning mt-2" role="alert">
-                    {{ error }}
-                </div>
-            {% endif %}
-        <form method ="post">
-            <div id = "radiv">
-            <label class="rad"><input checked id="inf" type="radio" name="type" value="influencer" required> Influencer</label>
-            <label class="rad"><input id="spon" type="radio" name="type" value="sponsor" required> Sponsor</label>
+        <div class="alert alert-warning mt-2" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form method="post">
+            <div id="radiv">
+                <label class="rad"><input checked id="inf" type="radio" name="type" value="influencer" required>
+                    Influencer</label>
+                <label class="rad"><input id="spon" type="radio" name="type" value="sponsor" required> Sponsor</label>
             </div>
             <label for="email">Email <p id="star">*</p></label>
             <input name="email" placeholder="Type..." type="email" id="email" required>
@@ -141,7 +143,8 @@
 
             <button type="submit">LOGIN</button>
 
-            <p>Or continue with<br><a href="{{url_for("main.signup_influencer")}}">Sign up as Influencer</a> or <a href="{{url_for("main.signup_sponsor")}}">Sign up as Sponsor</a>  </p>
+            <p>Or continue with<br><a href="{{url_for(" main.signup_influencer")}}">Sign up as Influencer</a> or <a
+                    href="{{url_for(" main.signup_sponsor")}}">Sign up as Sponsor</a> </p>
         </form>
     </div>
 

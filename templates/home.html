@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Influencer Engagement and Sponsorship Coordination Platform</title>
-    
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
@@ -13,30 +15,37 @@
             background-color: #f8f9fa;
             color: #343a40;
         }
+
         .container {
             max-width: 960px;
             margin: 50px auto;
         }
+
         .header {
             text-align: center;
             padding: 50px 0;
         }
+
         .header h1 {
             font-size: 3rem;
             margin-bottom: 20px;
         }
+
         .header p {
             font-size: 1.2rem;
         }
+
         .buttons {
             text-align: center;
             margin-top: 30px;
         }
+
         .buttons .btn {
             margin: 10px;
             padding: 15px 30px;
             font-size: 1rem;
         }
+
         .footer {
             text-align: center;
             margin-top: 50px;
@@ -46,8 +55,9 @@
         }
     </style>
 </head>
+
 <body>
-  
+
     <div class="container">
         <div class="header">
             <h1>Influencer Engagement and Sponsorship Coordination Platform</h1>
@@ -55,8 +65,8 @@
             <p>Project by Vaibhav Sharma<br>Roll No: 23F2003002<br>Level: Diploma<br>IIT Madras, BS Degree Program</p>
         </div>
         <div class="buttons">
-           
-        
+
+
             <a href="{{url_for('main.signup_sponsor')}}" class="btn btn-success">Register as Sponsor</a>
             <a href="{{url_for('main.login_user')}}" class="btn btn-primary">Login as Influencer/Sponsor</a>
 
@@ -74,4 +84,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
