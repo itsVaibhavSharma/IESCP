@@ -4,6 +4,10 @@
 
 A web application built using **Python**, **Flask**, and **SQLite** that connects **Sponsors** and **Influencers** for advertising campaigns. Sponsors can create campaigns, view influencer profiles, and manage advertising requests. Influencers can explore public campaigns and submit their ad requests. The platform offers an easy-to-use dashboard with features for both Sponsors and Influencers.
 
+## Demo
+
+You can check the live demo of the platform here: **[Live Demo Link](https://iescp.vercel.app/)**
+
 ## Features
 
 - **User Authentication** for both Sponsors and Influencers.
@@ -19,7 +23,7 @@ A web application built using **Python**, **Flask**, and **SQLite** that connect
 
 ## Technologies Used
 
-- **Backend**: Python, Flask, Jinja2, SQLite, SQLAlchemy
+- **Backend**: Python, Flask, Jinja2, SQLite (Postgres for deployment), SQLAlchemy
 - **Frontend**: HTML, CSS, Bootstrap, JavaScript, AJAX
 - **Visualization**: Matplotlib, Charts.js
 - **Other Tools**: Git, Calendar, Datetime
@@ -45,6 +49,14 @@ A web application built using **Python**, **Flask**, and **SQLite** that connect
 ### Sponsor Dashboard
 
 ![Sponsor Dashboard](screenshots/SponDashboard.png)
+
+##### Edit Profile
+
+![Sponsor Edit Profile](screenshots/sponEditProf.png)
+
+##### Add Money
+
+![Sponsor AddMoney](screenshots/sponAddMoney.png)
 
 ### Sponsor Dashboard: Campaigns
 
@@ -117,10 +129,6 @@ A web application built using **Python**, **Flask**, and **SQLite** that connect
 ### Admin Dashboard: AdRequests
 
 ![Adrequests](screenshots/adminAdreq.png)
-
-## Demo
-
-You can check the live demo of the platform here: **[Live Demo Link](#)**
 
 ## Installation
 
